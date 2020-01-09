@@ -28,15 +28,15 @@ import java.util.Map;
  * @author riccardo.iovenitti
  *
  */
-public class Index {
-	private final static Index _instance = new Index();
+public class InverseIndex {
+	private final static InverseIndex _instance = new InverseIndex();
 	private Map<String, List<Integer>> inverseIndexMap;
 	
-	private Index() {
+	private InverseIndex() {
 		inverseIndexMap = new HashMap<>();
 	}
 	
-	public static Index access() {
+	public static InverseIndex access() {
 		return _instance;
 	}
 	

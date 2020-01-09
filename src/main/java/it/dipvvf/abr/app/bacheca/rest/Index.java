@@ -18,7 +18,7 @@ import javax.ws.rs.core.Response;
  */
 @Path("index")
 @Produces(MediaType.APPLICATION_JSON)
-public interface Solr {
+public interface Index {
 	@POST
 	@Path("{id: \\d+}")
 	public Response index(@PathParam("id") int id, String body);
