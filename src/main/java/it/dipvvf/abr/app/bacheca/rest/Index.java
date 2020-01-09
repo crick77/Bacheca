@@ -30,4 +30,8 @@ public interface Index {
 	@DELETE
 	@Path("{id: \\d+}")
 	public Response delete(@PathParam("id") int id);
+	
+	@GET
+	@Path("stats")
+	public Response statistics();
 }

@@ -32,4 +32,8 @@ public class IndexService implements Index {
 		return Response.ok().build();
 	}
 
+	@Override
+	public Response statistics() {
+		return Response.ok(InverseIndex.access().getStatistics()).build();
+	}
 }

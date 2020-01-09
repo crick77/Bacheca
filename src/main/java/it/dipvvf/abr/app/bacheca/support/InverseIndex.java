@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * Implementa una versione semplificata di "indice inverso" utilizzato per le ricerche full-text.
  * Il sistema elimina punteggiature e parole inferiori a 3 caratteri per non intasare l'indice.
@@ -31,9 +33,11 @@ import java.util.Map;
 public class InverseIndex {
 	private final static InverseIndex _instance = new InverseIndex();
 	private Map<String, List<Integer>> inverseIndexMap;
+	private Map<Integer, Boolean> uniqueIds;
 	
 	private InverseIndex() {
 		inverseIndexMap = new HashMap<>();
+		uniqueIds = new HashMap<>();
 	}
 	
 	public static InverseIndex access() {
@@ -65,6 +69,9 @@ public class InverseIndex {
 					ids.add(id);
 				}
 			}
+			
+			// count unique document 
+			uniqueIds.put(id, true);
 		}
 	}
 	
@@ -123,6 +130,18 @@ public class InverseIndex {
 		for(String token : toBeRemoved) {
 			inverseIndexMap.remove(token);
 		}
+		
+		// update unique counter
+		uniqueIds.remove(id);
+	}
+	
+	/**
+	 * Restituisce le statistiche dell'indice
+	 * 
+	 * @return
+	 */
+	public synchronized IndexStats getStatistics() {
+		return new IndexStats(inverseIndexMap.size(), uniqueIds.size());
 	}
 	
 	/**
@@ -143,5 +162,31 @@ public class InverseIndex {
 		text = text.replaceAll("\\s{2,}", " ").trim();
 		// tokenizza tramite spazi
 		return text.split("[\\s]+");
+	}
+	
+	/**
+	 * Inner class per le statistiche
+	 * 
+	 * @author riccardo.iovenitti
+	 *
+	 */
+	@XmlRootElement
+	class IndexStats {
+		private int tokenCount;
+		private int documentCount;
+		
+		public IndexStats(int tokenCount, int documentCount) {
+			super();
+			this.tokenCount = tokenCount;
+			this.documentCount = documentCount;
+		}
+		
+		public int getTokenCount() {
+			return tokenCount;
+		}
+		
+		public int getDocumentCount() {
+			return documentCount;
+		}
 	}
 }
