@@ -2,26 +2,28 @@ package it.dipvvf.abr.app.bacheca.model;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * POJO per i record della tabella Allegato
+ * 
+ * @author riccardo.iovenitti
+ *
+ */
 @XmlRootElement
 public class Allegato {
 	private int id;
 	private String nomefile;
 	private int dimensione;
-	private String descrizione;
-	private int ordine;
 	private byte[] contenuto;
 	
 	public Allegato() {
 		super();
 	}
 
-	public Allegato(int id, String nomefile, int dimensione, String descrizione, int ordine, byte[] contenuto) {
+	public Allegato(int id, String nomefile, int dimensione, byte[] contenuto) {
 		super();
 		this.id = id;
 		this.nomefile = nomefile;
 		this.dimensione = dimensione;
-		this.descrizione = descrizione;
-		this.ordine = ordine;
 		this.contenuto = contenuto;
 	}
 
@@ -47,22 +49,6 @@ public class Allegato {
 
 	public void setDimensione(int dimensione) {
 		this.dimensione = dimensione;
-	}
-
-	public String getDescrizione() {
-		return descrizione;
-	}
-
-	public void setDescrizione(String descrizione) {
-		this.descrizione = descrizione;
-	}
-
-	public int getOrdine() {
-		return ordine;
-	}
-
-	public void setOrdine(int ordine) {
-		this.ordine = ordine;
 	}
 
 	public byte[] getContenuto() {

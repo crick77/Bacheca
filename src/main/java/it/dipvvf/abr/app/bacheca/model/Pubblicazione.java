@@ -4,8 +4,14 @@ import java.sql.Date;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * POJO per i record della tabella Pubblicazione
+ * 
+ * @author riccardo.iovenitti
+ *
+ */
 @XmlRootElement
-public class Elenco {
+public class Pubblicazione {
 	private int id;
 	private String tipo;
 	private int numero;
@@ -13,13 +19,16 @@ public class Elenco {
 	private String titolo;
 	private String ufficio;
 	private String proprietario;
+	private String nomeDocumento;
+	private int dimensione;
+	private byte[] contenutoDocumento;
 	
-	public Elenco() {
+	public Pubblicazione() {
 		super();
 	}
 	
-	public Elenco(int id, String tipo, int numero, Date dataPubblicazione, String titolo, String ufficio,
-			String proprietario) {
+	public Pubblicazione(int id, String tipo, int numero, Date dataPubblicazione, String titolo, String ufficio,
+			String proprietario, String nomeDocumento, int dimensione, byte[] contenutoDocumento) {
 		super();
 		this.id = id;
 		this.tipo = tipo;
@@ -28,6 +37,9 @@ public class Elenco {
 		this.titolo = titolo;
 		this.ufficio = ufficio;
 		this.proprietario = proprietario;
+		this.nomeDocumento = nomeDocumento;
+		this.dimensione = dimensione;
+		this.contenutoDocumento = contenutoDocumento;
 	}
 
 	public int getId() {
@@ -85,6 +97,30 @@ public class Elenco {
 	public void setProprietario(String proprietario) {
 		this.proprietario = proprietario;
 	}
+	
+	public String getNomeDocumento() {
+		return nomeDocumento;
+	}
+
+	public void setNomeDocumento(String nomeDocumento) {
+		this.nomeDocumento = nomeDocumento;
+	}
+
+	public int getDimensione() {
+		return dimensione;
+	}
+
+	public void setDimensione(int dimensione) {
+		this.dimensione = dimensione;
+	}
+
+	public byte[] getContenutoDocumento() {
+		return contenutoDocumento;
+	}
+
+	public void setContenutoDocumento(byte[] contenutoDocumento) {
+		this.contenutoDocumento = contenutoDocumento;
+	}
 
 	@Override
 	public int hashCode() {
@@ -102,7 +138,7 @@ public class Elenco {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Elenco other = (Elenco) obj;
+		Pubblicazione other = (Pubblicazione) obj;
 		if (id != other.id)
 			return false;
 		return true;

@@ -7,8 +7,15 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+/**
+ * Centralizza l'accesso al datasource recuperato tramite JNDI.
+ * Implementa pattern singleton.
+ * 
+ * @author riccardo.iovenitti
+ *
+ */
 public class Database {
-	private static Database _instance;
+	private static Database _instance = new Database();
 	private DataSource ds;
 
 	private Database() {
@@ -25,9 +32,6 @@ public class Database {
 	}
 	
 	public synchronized static Database getInstance() {
-		if(_instance == null) {
-			_instance = new Database();
-		}
 		return _instance;
 	}
 	
