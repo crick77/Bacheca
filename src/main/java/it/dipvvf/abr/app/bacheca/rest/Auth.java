@@ -17,7 +17,7 @@ import it.dipvvf.abr.app.bacheca.model.User;
  * @author riccardo.iovenitti
  *
  */
-@Path("user")
+@Path("auth")
 @Produces(MediaType.TEXT_PLAIN)
 public interface Auth {
 	@POST
