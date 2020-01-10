@@ -29,6 +29,10 @@ public interface Bacheca {
 	public Response getElenco(@PathParam("tipo") String tipo, @Context UriInfo info);
 	
 	@GET
+	@Path("{tipo: [a-zA-Z]+}/years")
+	public Response getAnnualita(@PathParam("tipo") String tipo, @Context UriInfo info);
+	
+	@GET
 	@Path("{anno: \\d+}/{tipo: [a-zA-Z]+}")
 	public Response getElencoAnno(@PathParam("tipo") String tipo, @PathParam("anno") int anno, @Context UriInfo info);
 	

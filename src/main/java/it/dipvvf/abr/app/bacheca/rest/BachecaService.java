@@ -377,4 +377,30 @@ public class BachecaService implements Bacheca {
 			return Response.serverError().entity(ex.toString()).build();
 		}
 	}
+
+	@Override
+	public Response getAnnualita(String tipo, UriInfo info) {
+		try (Connection con = Database.getInstance().getConnection()) {
+			// Estrae l'intero anno attuale
+			String sql = "SELECT DISTINCT(EXSTRACT(year FROM p.data_pubblicazione) AS anno FROM pubblicazione p WHERE (p.tipo = ?) ORDER BY anno DESC";
+			try (PreparedStatement ps = con.prepareStatement(sql)) {
+				ps.setString(1, tipo);
+				
+				List<Integer> lAnni = new ArrayList<>();
+				try (ResultSet rs = ps.executeQuery()) {
+					while(rs.next()) {
+						lAnni.add(rs.getInt("anno"));
+					}
+					
+					return Response.ok(Utils.resourcesToURI(info, lAnni)).build();
+				}
+			}
+			
+			
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+			return Response.serverError().entity(ex.toString()).build();
+		}
+	}
 }
