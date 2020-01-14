@@ -21,25 +21,43 @@
 			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
 			<version>${cxf.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-frontend-jaxws</artifactId>
+			<version>${cxf.version}</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-transports-http</artifactId>
 			<version>${cxf.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-rs-service-description</artifactId>
 			<version>${cxf.version}</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.apache.cxf/cxf-rt-rs-extension-providers -->
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-rs-extension-providers</artifactId>
 			<version>${cxf.version}</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.codehaus.jettison/jettison -->
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-transports-http-hc</artifactId>
+			<version>${cxf.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-rs-client</artifactId>
+			<version>${cxf.version}</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.codehaus.jettison</groupId>
 			<artifactId>jettison</artifactId>
@@ -78,6 +96,48 @@
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-codegen-plugin</artifactId>
+				<version>${cxf.version}</version>
+				<executions>
+					<execution>
+						<id>generate-mail-sources</id>
+						<phase>generate-sources</phase>
+						<configuration>
+							<sourceRoot>${project.build.directory}/generated-sources/cxf</sourceRoot>
+							<wsdlOptions>
+								<wsdlOption>
+									<wsdl>${basedir}/src/main/resources/mail.wsdl</wsdl>
+									<bindingFiles>
+										<bindingFile>${basedir}/src/main/resources/async_binding.xml</bindingFile>
+									</bindingFiles>
+								</wsdlOption>
+							</wsdlOptions>
+						</configuration>
+						<goals>
+							<goal>wsdl2java</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>generate-auth-sources</id>
+						<phase>generate-sources</phase>
+						<configuration>
+							<sourceRoot>${project.build.directory}/generated-sources/cxf</sourceRoot>
+							<wsdlOptions>
+								<wsdlOption>
+									<wsdl>${basedir}/src/main/resources/auth.wsdl</wsdl>
+								</wsdlOption>
+							</wsdlOptions>
+						</configuration>
+						<goals>
+							<goal>wsdl2java</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
 		</plugins>
 
 		<finalName>Bacheca</finalName>

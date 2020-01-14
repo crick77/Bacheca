@@ -1,11 +1,19 @@
 package it.dipvvf.abr.app.bacheca.support;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
+
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ArrayNode;
 
 /**
  * Implementa una versione semplificata di "indice inverso" utilizzato per le ricerche full-text.
@@ -31,15 +39,55 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 public class InverseIndex {
+	private final static String INDEX_FILE = System.getProperty("user.home")+"/bacheca_index.dat";
 	private final static InverseIndex _instance = new InverseIndex();
 	private Map<String, List<Integer>> inverseIndexMap;
 	private Map<Integer, Boolean> uniqueIds;
 	
+	/**
+	 * Inizializza l'indice tentando di caricare l'indice da file.
+	 * 
+	 */
 	private InverseIndex() {
-		inverseIndexMap = new HashMap<>();
 		uniqueIds = new HashMap<>();
+		inverseIndexMap = new HashMap<>();
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode node = mapper.readTree(new File(INDEX_FILE));
+			Iterator<String> jn = node.getFieldNames();
+			while(jn.hasNext()) {
+				String tokenName = jn.next();
+				ArrayNode v = (ArrayNode)node.get(tokenName);
+				Iterator<JsonNode> tokenIds = v.getElements();
+				List<Integer> ids = new ArrayList<>();
+				while(tokenIds.hasNext()) {
+					ids.add(tokenIds.next().asInt());
+				}
+				
+				inverseIndexMap.put(tokenName, ids);
+			}
+			
+            // ricrea la mappa degli id univoci
+            for(List<Integer> ids : inverseIndexMap.values()) {
+            	for(Integer id : ids) {
+            		uniqueIds.put(id, Boolean.TRUE);
+            	}
+            }
+            
+            System.out.println("Indice caricato. "+getStatistics());
+		}
+		catch(Exception e) {
+			System.out.println("Impossibile caricare l'indice a causa di "+e+": creazione indice vuoto.");
+			inverseIndexMap.clear();
+			uniqueIds.clear();
+		}		
 	}
 	
+	/**
+	 * Singleton accessor
+	 * 
+	 * @return 
+	 */
 	public static InverseIndex access() {
 		return _instance;
 	}
@@ -71,7 +119,7 @@ public class InverseIndex {
 			}
 			
 			// count unique document 
-			uniqueIds.put(id, true);
+			uniqueIds.put(id, Boolean.TRUE);
 		}
 	}
 	
@@ -145,6 +193,31 @@ public class InverseIndex {
 	}
 	
 	/**
+	 * Salva il contenuto dell'indice in un file JSON
+	 */
+	public synchronized void saveToFile() {
+		try {
+			if(inverseIndexMap!=null && inverseIndexMap.size()==0) {
+				System.out.println("Indice vuoto. Nessun salvataggio.");
+				return;
+			}
+			
+			ObjectMapper om = new ObjectMapper();
+			String json = om.writerWithDefaultPrettyPrinter()
+					  .writeValueAsString(inverseIndexMap);
+			try(FileWriter fileOut = new FileWriter(INDEX_FILE)) {
+				fileOut.write(json);
+			}
+            
+			System.out.println("JSON indice: "+json);
+            System.out.println("Indice salvato su ["+INDEX_FILE+"].");
+		}
+		catch(IOException ioe) {
+			System.err.println("Impossibile salvare l'indice: "+ioe);
+		}
+	}
+	
+	/**
 	 * Tokenizza il testo eliminando segni di punteggiatura, spazi, ritorni
 	 * a capo e parole troppo brevi (<3 caratteri)
 	 * 
@@ -187,6 +260,11 @@ public class InverseIndex {
 		
 		public int getDocumentCount() {
 			return documentCount;
+		}
+
+		@Override
+		public String toString() {
+			return "IndexStats [tokenCount=" + tokenCount + ", documentCount=" + documentCount + "]";
 		}
 	}
 }

@@ -6,7 +6,8 @@
 	<display-name>Bacheca</display-name>
 	<servlet>
 		<servlet-name>CXFNonSpringJaxrsServlet</servlet-name>
-		<servlet-class>org.apache.cxf.jaxrs.servlet.CXFNonSpringJaxrsServlet</servlet-class>
+		<!--  <servlet-class>org.apache.cxf.jaxrs.servlet.CXFNonSpringJaxrsServlet</servlet-class> -->
+		<servlet-class>it.dipvvf.abr.app.bacheca.servlet.BachecaRestServlet</servlet-class>
 		<multipart-config>
             <max-file-size>10485760</max-file-size>
             <max-request-size>31457280</max-request-size>
@@ -15,7 +16,7 @@
 		<init-param>
 			<param-name>jaxrs.serviceClasses</param-name>
 			<param-value>
-				it.dipvvf.abr.app.bacheca.rest.BachecaService, it.dipvvf.abr.app.bacheca.rest.SolrService, it.dipvvf.abr.app.bacheca.rest.AuthService
+				it.dipvvf.abr.app.bacheca.rest.BachecaService, it.dipvvf.abr.app.bacheca.rest.IndexService, it.dipvvf.abr.app.bacheca.rest.AuthService
 			</param-value>
 		</init-param>
 		<init-param>

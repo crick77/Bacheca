@@ -10,20 +10,28 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
+import org.apache.cxf.jaxrs.client.WebClient;
 
 import it.dipvvf.abr.app.bacheca.model.Allegato;
 import it.dipvvf.abr.app.bacheca.model.Pubblicazione;
 import it.dipvvf.abr.app.bacheca.support.Database;
+import it.dipvvf.abr.app.bacheca.support.IndexInvocationCallback;
+import it.dipvvf.abr.app.bacheca.support.MailAsyncHandler;
 import it.dipvvf.abr.app.bacheca.support.Rollback;
 import it.dipvvf.abr.app.bacheca.support.SetAutoCommit;
 import it.dipvvf.abr.app.bacheca.support.Utils;
+import it.dipvvf.abr.app.mail.soap.Attachment;
+import it.dipvvf.abr.app.mail.soap.MailSOAP;
+import it.dipvvf.abr.app.mail.soap.MailSOAPServiceService;
+import it.dipvvf.abr.app.mail.soap.SendMail;
 
 public class BachecaService implements Bacheca {
 
@@ -207,12 +215,10 @@ public class BachecaService implements Bacheca {
 		     SetAutoCommit ac = new SetAutoCommit(con, false);
 		     Rollback rb = new Rollback(con)) {
 			
+			// Email attachment list
+			List<Attachment> lAtt = new ArrayList<>();
+			
 			/** START DEBUG PURPOSE - TO BE REMOVED **/
-			Enumeration<String> names = req.getParameterNames();
-			while(names.hasMoreElements()) {
-				String n = names.nextElement();
-				System.out.println("["+n+"]=["+req.getParameter(n)+"]");
-			}
 			Collection<Part> _parts = req.getParts();
 			int count = 1;
 			for(Part part : _parts) {
@@ -242,7 +248,7 @@ public class BachecaService implements Bacheca {
 			}
 			
 			// insert pubblicazione
-			sql = "INSERT INTO pubblicazione (tipo, numero, data_pubblicazione, titolo, ufficio, proprietario, nome_documento, dimensione, contenuto_documento) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			sql = "INSERT INTO pubblicazione (tipo, numero, data_pubblicazione, titolo, ufficio, proprietario, nome_documento, dimensione, contenuto_documento, mail_status, indexing_status) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			int id = -1;
 			try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 				Part part = req.getPart("documento");
@@ -263,14 +269,22 @@ public class BachecaService implements Bacheca {
 				ps.setString(7,  fName);
 				ps.setInt(8, bytes.length);
 				ps.setBytes(9, bytes);
+				ps.setString(10, "PENDING");
+				ps.setString(11, "PENDING");
 				
 				ps.executeUpdate();
 				
-				ResultSet rsK = ps.getGeneratedKeys();
-				if(rsK.next()) {
-					id = rsK.getInt(1);
+				try(ResultSet rsK = ps.getGeneratedKeys()) {
+					if(rsK.next()) {
+						id = rsK.getInt(1);
+					}
 				}
-				rsK.close();
+				
+				// Add attachment for email
+				Attachment att = new Attachment();
+				att.setName(fName);
+				att.setData(bytes);
+				lAtt.add(att);
 			}
 			
 			// insert all attachments
@@ -294,11 +308,36 @@ public class BachecaService implements Bacheca {
 						ps.setBytes(4, bytes);
 						
 						ps.executeUpdate();
+						
+						// Add attachment for email
+						Attachment att = new Attachment();
+						att.setName(fName);
+						att.setData(bytes);
+						lAtt.add(att);
 					}
 				}
 			}
 			
 			rb.commit();
+			
+			// Chiama servizio di indicizzazione in async (REST)
+			WebClient client = WebClient.create("http://localhost:8080/Bacheca/api/index/"+id);
+			client.getHeaders().add("Accept", "text/plain,text/html,application/json,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+			client.getHeaders().add("Content-Type", "text/plain");
+			client.async()
+				  .method("POST", Entity.text(req.getParameter("titolo")), new IndexInvocationCallback(id));
+					
+			// Chiama servizio di spedizione mail in async (SOAP)
+			MailSOAP mailService = new MailSOAPServiceService().getMailSOAPServicePort();
+			
+			SendMail sm = new SendMail();
+			sm.setSender("ciccio@send.com");
+			sm.setSubject("Prova invio");
+			sm.setBody("Testo della mail");
+			sm.getRecipients().add("all@mondo.com");
+			sm.getAttachments().addAll(lAtt);
+			mailService.sendMailAsync(sm, new MailAsyncHandler(id));
+	        
 			return Response.created(Utils.resourceToURI(info, id)).build();
 		}
 		catch(Exception ex) {
@@ -395,8 +434,6 @@ public class BachecaService implements Bacheca {
 					return Response.ok(Utils.resourcesToURI(info, lAnni)).build();
 				}
 			}
-			
-			
 		}
 		catch(Exception ex) {
 			ex.printStackTrace();

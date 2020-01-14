@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8'?><wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://soap.mail.app.abr.dipvvf.it/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1="http://schemas.xmlsoap.org/soap/http" name="MailSOAPServiceService" targetNamespace="http://soap.mail.app.abr.dipvvf.it/">
+  <wsdl:types>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://soap.mail.app.abr.dipvvf.it/" attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="http://soap.mail.app.abr.dipvvf.it/">
+  <xs:element name="attachment" type="tns:attachment"/>
+  <xs:element name="sendMail" type="tns:sendMail"/>
+  <xs:complexType name="sendMail">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="sender" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="recipients" type="xs:string"/>
+      <xs:element minOccurs="0" name="subject" type="xs:string"/>
+      <xs:element minOccurs="0" name="body" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="attachments" type="tns:attachment"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="attachment">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="data" type="xs:base64Binary"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="mailReturnResponse">
+    <xs:sequence>
+      <xs:element name="status" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="mailReturnResponse" nillable="true" type="tns:mailReturnResponse"/>
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="sendMail">
+    <wsdl:part element="tns:sendMail" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="sendMailResponse">
+    <wsdl:part element="tns:mailReturnResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="MailSOAP">
+    <wsdl:operation name="sendMail">
+      <wsdl:input message="tns:sendMail" name="sendMail">
+    </wsdl:input>
+      <wsdl:output message="tns:sendMailResponse" name="sendMailResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="MailSOAPServiceServiceSoapBinding" type="tns:MailSOAP">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="sendMail">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="sendMail">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="sendMailResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="MailSOAPServiceService">
+    <wsdl:port binding="tns:MailSOAPServiceServiceSoapBinding" name="MailSOAPServicePort">
+      <soap:address location="http://localhost:8080/VVFMailSOAP/mail"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

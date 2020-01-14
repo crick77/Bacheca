@@ -1,5 +1,6 @@
 package it.dipvvf.abr.app.bacheca.rest;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -21,6 +22,7 @@ import javax.ws.rs.core.Response;
 public interface Index {
 	@POST
 	@Path("{id: \\d+}")
+	@Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML, MediaType.TEXT_PLAIN})
 	public Response index(@PathParam("id") int id, String body);
 	
 	@GET
