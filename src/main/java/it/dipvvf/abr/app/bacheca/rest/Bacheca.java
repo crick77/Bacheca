@@ -10,6 +10,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -26,7 +27,7 @@ import javax.ws.rs.core.UriInfo;
 public interface Bacheca {
 	@GET
 	@Path("{tipo: [a-zA-Z]+}")
-	public Response getElenco(@PathParam("tipo") String tipo, @Context UriInfo info);
+	public Response getElenco(@PathParam("tipo") String tipo, @QueryParam("q") String query, @Context UriInfo info);
 	
 	@GET
 	@Path("{tipo: [a-zA-Z]+}/years")
@@ -34,7 +35,7 @@ public interface Bacheca {
 	
 	@GET
 	@Path("{anno: \\d+}/{tipo: [a-zA-Z]+}")
-	public Response getElencoAnno(@PathParam("tipo") String tipo, @PathParam("anno") int anno, @Context UriInfo info);
+	public Response getElencoAnno(@PathParam("tipo") String tipo, @PathParam("anno") int anno, @QueryParam("q") String query, @Context UriInfo info);
 	
 	@GET
 	@Path("{tipo: [a-zA-Z]+}/{id: \\d+}")

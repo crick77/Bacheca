@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +20,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.cxf.jaxrs.client.WebClient;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import it.dipvvf.abr.app.bacheca.model.Allegato;
 import it.dipvvf.abr.app.bacheca.model.Pubblicazione;
@@ -36,14 +38,22 @@ import it.dipvvf.abr.app.mail.soap.SendMail;
 public class BachecaService implements Bacheca {
 
 	@Override
-	public Response getElenco(String tipo, UriInfo info) {
-		return getElencoAnno(tipo, LocalDate.now().getYear(), info);
+	public Response getElenco(String tipo, String query, UriInfo info) {
+		return getElencoAnno(tipo, LocalDate.now().getYear(), query, info);
 	}
 
 	@Override
-	public Response getElencoAnno(String tipo, int anno, UriInfo info) {
+	public Response getElencoAnno(String tipo, int anno, String query, UriInfo info) {
 		tipo = tipo.trim().toUpperCase();
-
+		query = (query!=null) ? query.trim() : "";
+		
+		// Effettua la query sull'indice
+		Integer[] matchId = performSearch(query);
+		// nulla? restituisci ok con entity vuoto.
+		if(matchId.length==0) {
+			return Response.ok().build();
+		}
+		
 		// Verifica che esiste la tipologia di documento richiesta
 		try (Connection con = Database.getInstance().getConnection()) {
 			try (PreparedStatement ps = con.prepareStatement("SELECT COUNT(*) AS cnt FROM pubblicazione p WHERE p.tipo = ?")) {
@@ -61,12 +71,18 @@ public class BachecaService implements Bacheca {
 			LocalDate lastDay = LocalDate.of(anno, 12, 31);
 
 			// Estrae l'intero anno attuale
-			try (PreparedStatement ps = con.prepareStatement(
-					"SELECT p.id FROM pubblicazione p WHERE (p.tipo = ?) AND (p.data_pubblicazione BETWEEN ? AND ?) ORDER BY p.numero DESC")) {
+			String sql = "SELECT p.id FROM pubblicazione p WHERE (p.tipo = ?) AND (p.data_pubblicazione BETWEEN ? AND ?) ";
+			sql+="AND p.id IN ("+String.join(",", Collections.nCopies(matchId.length, "?"))+") ";
+			sql+="ORDER BY p.numero DESC";
+					
+			try (PreparedStatement ps = con.prepareStatement(sql)) {
 				ps.setString(1, tipo);
 				ps.setObject(2, firstDay);
 				ps.setObject(3, lastDay);
-
+				for(int i=0;i<matchId.length;i++) {
+					ps.setObject(i+4, matchId[i]);
+				}
+				
 				try (ResultSet rs = ps.executeQuery()) {
 					List<Integer> lElenco = new ArrayList<>();
 					while (rs.next()) {					
@@ -439,5 +455,36 @@ public class BachecaService implements Bacheca {
 			ex.printStackTrace();
 			return Response.serverError().entity(ex.toString()).build();
 		}
+	}
+	
+	private Integer[] performSearch(String query) {
+		Integer[] matchId = new Integer[0];
+		// non effettuare ricerche per testi < 3 caratteri
+		if(query.length()>3) {
+			// interroga l'indice
+			WebClient client = WebClient.create("http://localhost:8080/Bacheca/api/index/search");
+			client.query("q", query);
+			client.getHeaders().add("Accept", "text/plain,text/html,application/json,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+			client.getHeaders().add("Content-Type", "text/plain");
+			Response response = client.get();
+			// qualche risultato?
+			if(response.getStatus()==200) {
+				try(InputStream is = (InputStream)response.getEntity()) {
+					StringBuilder sb = new StringBuilder();
+					int c;
+					while((c = is.read()) != -1) {
+						sb.append((char)c);
+					}
+					// recupera gli id che fanno match
+					ObjectMapper om = new ObjectMapper();
+					matchId = om.readValue(sb.toString(), Integer[].class);
+				}
+				catch(Exception e) {
+					// in caso di errore non fare nulla ma restituisci risultato vuoto
+				}
+			}
+		}
+		
+		return matchId;	
 	}
 }

@@ -19,10 +19,10 @@ import javax.ws.rs.core.Response;
  */
 @Path("index")
 @Produces(MediaType.APPLICATION_JSON)
+@Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML, MediaType.TEXT_PLAIN})
 public interface Index {
 	@POST
 	@Path("{id: \\d+}")
-	@Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML, MediaType.TEXT_PLAIN})
 	public Response index(@PathParam("id") int id, String body);
 	
 	@GET
