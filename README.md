@@ -7,7 +7,9 @@ The application is made of 3 differnt projects (Bacheca, AuthServiceSOAP-VVF and
 will use the others as support services (namely AAA - "Authentication, Authorization and Accouting" and mail delivery).
 
 You will need postgres database (we provived a restore SQL file with some data) and SQL schema creation (empty).
-You also need Tomcat 8.5+ with PGSQL JDBC driver (latest version). 
+You also need Tomcat 8.5+ and Java 1.8 with PGSQL JDBC driver (latest version). 
+
+The webservice provider used is Apache CXF.
 
 To confiure Tomcat simply put the jdbc driver file (JAR) into _$TOMCAT_HOME\lib_ directory then open under _$TOMCAT_HOME\conf_ the _context.xml_ file and put anywhere under the `<Context>...</Context>` tags the following:
 
@@ -20,3 +22,5 @@ To confiure Tomcat simply put the jdbc driver file (JAR) into _$TOMCAT_HOME\lib_
 ```
 
 Please, put the correct username/password for your database and adjust any database/schema reference in the url property.
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
