@@ -9,13 +9,14 @@ will use the others as support services (namely AAA - "Authentication, Authoriza
 You will need postgres database (we provived a restore SQL file with some data) and SQL schema creation (empty).
 You also need Tomcat 8.5+ with PGSQL JDBC driver (latest version). 
 
-To confiure Tomcat simply put the jdbc driver file (JAR) into $TOMCAT_HOME\lib directory then open under $TOMCAT_HOME\conf the context.xml
-file and put anywhere under the <Context>...</Context> tags the following:
+To confiure Tomcat simply put the jdbc driver file (JAR) into _$TOMCAT_HOME\lib_ directory then open under _$TOMCAT_HOME\conf_ the _context.xml_ file and put anywhere under the `<Context>...</Context>` tags the following:
 
+```
 <Resource name="jdbc/bacheca" auth="Container"
           type="javax.sql.DataSource" driverClassName="org.postgresql.Driver"
           url="jdbc:postgresql://localhost/postgres?currentSchema=bacheca"
           username="postgres" password="YOURPASSWORD" maxTotal="10" maxIdle="5"
 		  maxWaitMillis="-1"/>
-      
-Please, put the correct password for your database and adjust any database/schema reference in the url property.
+```
+
+Please, put the correct username/password for your database and adjust any database/schema reference in the url property.
