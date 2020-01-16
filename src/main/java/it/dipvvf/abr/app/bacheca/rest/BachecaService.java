@@ -487,4 +487,45 @@ public class BachecaService implements Bacheca {
 		
 		return matchId;	
 	}
+
+	@Override
+	public Response getCurrenYearItemDocumentStream(String tipo, int id, int idAll) {
+		int anno = LocalDate.now().getYear();
+		return getYearItemDocumentStream(tipo, anno, id, idAll);
+	}
+
+	@Override
+	public Response getYearItemDocumentStream(String tipo, int anno, int id, int idAll) {
+		try (Connection con = Database.getInstance().getConnection()) {
+			LocalDate firstDay = LocalDate.of(anno, 1, 1);
+			LocalDate lastDay = LocalDate.of(anno, 12, 31);
+			
+			String sql = "SELECT a.* FROM allegato a JOIN pubblicazione p ON a.id_pubblicazione = p.id WHERE (p.tipo = ?) AND "+
+						 "(p.data_pubblicazione BETWEEN ? AND ?) AND (p.id = ?) AND (a.id = ?)";
+			
+			try (PreparedStatement ps = con.prepareStatement(sql)) {
+				ps.setString(1, tipo);
+				ps.setObject(2, firstDay);
+				ps.setObject(3, lastDay);
+				ps.setInt(4, id);
+				ps.setInt(5, idAll);
+				
+				try (ResultSet rs = ps.executeQuery()) {					
+					if(rs.next()) {
+						String fileName = rs.getString("nomefile");
+						byte[] fileData = rs.getBytes("contenuto");
+						
+						return Utils.downloadFile(fileName, fileData);
+					}
+					else {
+						return Response.status(Response.Status.NOT_FOUND).build();
+					}
+				}
+			}
+		}
+		catch(SQLException sqle) {
+			sqle.printStackTrace();
+			return Response.serverError().entity(sqle.toString()).build();
+		}
+	}
 }

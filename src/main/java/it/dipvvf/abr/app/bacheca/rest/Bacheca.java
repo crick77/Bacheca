@@ -71,6 +71,16 @@ public interface Bacheca {
 	@Path("{anno: \\d+}/{tipo: [a-zA-Z]+}/{id: \\d+}/attachments/{idall: \\d+}")
 	public Response getYearItemDocumentDetail(@PathParam("tipo") String tipo, @PathParam("anno") int anno, @PathParam("id") int id, @PathParam("idall") int idAll);
 
+	@GET
+	@Path("{tipo: [a-zA-Z]+}/{id: \\d+}/attachments/{idall: \\d+}/stream")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response getCurrenYearItemDocumentStream(@PathParam("tipo") String tipo, @PathParam("id") int id, @PathParam("idall") int idAll);
+	
+	@GET
+	@Path("{anno: \\d+}/{tipo: [a-zA-Z]+}/{id: \\d+}/attachments/{idall: \\d+}/stream")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public Response getYearItemDocumentStream(@PathParam("tipo") String tipo, @PathParam("anno") int anno, @PathParam("id") int id, @PathParam("idall") int idAll);
+	
 	@POST
 	@Path("publish")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
