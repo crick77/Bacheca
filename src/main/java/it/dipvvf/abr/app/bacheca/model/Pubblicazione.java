@@ -3,6 +3,9 @@ package it.dipvvf.abr.app.bacheca.model;
 import java.sql.Date;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  * POJO per i record della tabella Pubblicazione
@@ -21,6 +24,8 @@ public class Pubblicazione {
 	private String proprietario;
 	private String nomeDocumento;
 	private int dimensione;
+	@XmlTransient
+	@JsonIgnore
 	private byte[] contenutoDocumento;
 	
 	public Pubblicazione() {

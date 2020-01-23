@@ -1,4 +1,4 @@
-package it.dipvvf.abr.app.bacheca.support;
+package it.dipvvf.abr.app.bacheca.support.soap;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import javax.xml.ws.AsyncHandler;
 import javax.xml.ws.Response;
 
+import it.dipvvf.abr.app.bacheca.support.sql.Database;
 import it.dipvvf.abr.app.mail.soap.MailReturnResponse;
 
 public class MailAsyncHandler implements AsyncHandler<MailReturnResponse> {

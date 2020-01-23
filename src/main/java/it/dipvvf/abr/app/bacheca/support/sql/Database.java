@@ -1,4 +1,4 @@
-package it.dipvvf.abr.app.bacheca.support;
+package it.dipvvf.abr.app.bacheca.support.sql;
 
 import java.sql.Connection;
 import java.sql.SQLException;

@@ -1,6 +1,9 @@
 package it.dipvvf.abr.app.bacheca.model;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  * POJO per i record della tabella Allegato
@@ -13,6 +16,8 @@ public class Allegato {
 	private int id;
 	private String nomefile;
 	private int dimensione;
+	@XmlTransient
+	@JsonIgnore
 	private byte[] contenuto;
 	
 	public Allegato() {

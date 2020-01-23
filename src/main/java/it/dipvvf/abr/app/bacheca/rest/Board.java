@@ -22,9 +22,9 @@ import javax.ws.rs.core.UriInfo;
  * @author riccardo.iovenitti
  *
  */
-@Path("bacheca")
+@Path("board")
 @Produces(MediaType.APPLICATION_JSON)
-public interface Bacheca {
+public interface Board {
 	@GET
 	@Path("{tipo: [a-zA-Z]+}")
 	public Response getElenco(@PathParam("tipo") String tipo, @QueryParam("q") String query, @Context UriInfo info);

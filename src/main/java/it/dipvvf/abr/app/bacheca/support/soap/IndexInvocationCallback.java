@@ -1,9 +1,11 @@
-package it.dipvvf.abr.app.bacheca.support;
+package it.dipvvf.abr.app.bacheca.support.soap;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
 import javax.ws.rs.client.InvocationCallback;
+
+import it.dipvvf.abr.app.bacheca.support.sql.Database;
 
 public class IndexInvocationCallback implements InvocationCallback<String> {
 	private int publishId;

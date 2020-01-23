@@ -24,18 +24,18 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import it.dipvvf.abr.app.bacheca.model.Allegato;
 import it.dipvvf.abr.app.bacheca.model.Pubblicazione;
-import it.dipvvf.abr.app.bacheca.support.Database;
-import it.dipvvf.abr.app.bacheca.support.IndexInvocationCallback;
-import it.dipvvf.abr.app.bacheca.support.MailAsyncHandler;
-import it.dipvvf.abr.app.bacheca.support.Rollback;
-import it.dipvvf.abr.app.bacheca.support.SetAutoCommit;
 import it.dipvvf.abr.app.bacheca.support.Utils;
+import it.dipvvf.abr.app.bacheca.support.soap.IndexInvocationCallback;
+import it.dipvvf.abr.app.bacheca.support.soap.MailAsyncHandler;
+import it.dipvvf.abr.app.bacheca.support.sql.Database;
+import it.dipvvf.abr.app.bacheca.support.sql.Rollback;
+import it.dipvvf.abr.app.bacheca.support.sql.SetAutoCommit;
 import it.dipvvf.abr.app.mail.soap.Attachment;
 import it.dipvvf.abr.app.mail.soap.MailSOAP;
 import it.dipvvf.abr.app.mail.soap.MailSOAPServiceService;
 import it.dipvvf.abr.app.mail.soap.SendMail;
 
-public class BachecaService implements Bacheca {
+public class BoardService implements Board {
 
 	@Override
 	public Response getElenco(String tipo, String query, UriInfo info) {
@@ -47,11 +47,18 @@ public class BachecaService implements Bacheca {
 		tipo = tipo.trim().toUpperCase();
 		query = (query!=null) ? query.trim() : "";
 		
-		// Effettua la query sull'indice
-		Integer[] matchId = performSearch(query);
-		// nulla? restituisci ok con entity vuoto.
-		if(matchId.length==0) {
-			return Response.ok().build();
+		// minimo tre caratteri per iniziare una ricerca
+		boolean doIndexSearch = (query.length()>=3);
+		Integer[] matchId = new Integer[0];
+		
+		// cercare nell'indice?
+		if(doIndexSearch) {
+			// Effettua la query sull'indice
+			matchId = performSearch(query);
+			// nulla? restituisci ok con entity vuoto.
+			if(matchId.length==0) {
+				return Response.ok().build();
+			}
 		}
 		
 		// Verifica che esiste la tipologia di documento richiesta
@@ -71,25 +78,42 @@ public class BachecaService implements Bacheca {
 			LocalDate lastDay = LocalDate.of(anno, 12, 31);
 
 			// Estrae l'intero anno attuale
-			String sql = "SELECT p.id FROM pubblicazione p WHERE (p.tipo = ?) AND (p.data_pubblicazione BETWEEN ? AND ?) ";
-			sql+="AND p.id IN ("+String.join(",", Collections.nCopies(matchId.length, "?"))+") ";
+			String sql = "SELECT p.id, p.tipo, p.numero, p.data_pubblicazione, p.titolo, p.ufficio, p.proprietario, ";
+			sql+="p.nome_documento, p.dimensione FROM pubblicazione AS p WHERE (p.tipo = ?) AND (p.data_pubblicazione BETWEEN ? AND ?) ";
+			if(doIndexSearch && matchId.length>0) {
+				sql+="AND p.id IN ("+String.join(",", Collections.nCopies(matchId.length, "?"))+") ";
+			}
 			sql+="ORDER BY p.numero DESC";
-					
+		
 			try (PreparedStatement ps = con.prepareStatement(sql)) {
 				ps.setString(1, tipo);
 				ps.setObject(2, firstDay);
 				ps.setObject(3, lastDay);
-				for(int i=0;i<matchId.length;i++) {
-					ps.setObject(i+4, matchId[i]);
+				if(doIndexSearch && matchId.length>0) {
+					for(int i=0;i<matchId.length;i++) {
+						ps.setObject(i+4, matchId[i]);
+					}
 				}
 				
 				try (ResultSet rs = ps.executeQuery()) {
-					List<Integer> lElenco = new ArrayList<>();
-					while (rs.next()) {					
-						lElenco.add(rs.getInt("id"));
+					List<Pubblicazione> lElenco = new ArrayList<>();
+					while (rs.next()) {	
+						Pubblicazione p = new Pubblicazione();
+						p.setId(rs.getInt("id"));
+						p.setTipo(rs.getString("tipo"));
+						p.setNumero(rs.getInt("numero"));
+						p.setDataPubblicazione(rs.getDate("data_pubblicazione"));
+						p.setTitolo(rs.getString("titolo"));
+						p.setUfficio(rs.getString("ufficio"));
+						p.setProprietario(rs.getString("proprietario"));
+						p.setNomeDocumento(rs.getString("nome_documento"));
+						p.setDimensione(rs.getInt("dimensione"));
+						
+						lElenco.add(p);
 					}
 
-					return Response.ok(Utils.resourcesToURI(info, lElenco)).build();
+					//return Response.ok(Utils.resourcesToURI(info, lElenco)).build();
+					return Response.ok(lElenco).build();
 				}
 			}
 		} catch (SQLException sqle) {
@@ -156,7 +180,7 @@ public class BachecaService implements Bacheca {
 			LocalDate firstDay = LocalDate.of(anno, 1, 1);
 			LocalDate lastDay = LocalDate.of(anno, 12, 31);
 			
-			String sql = "SELECT a.id FROM allegato a JOIN pubblicazone p ON a.id_elenco = e.id WHERE (p.tipo = ?) AND "+
+			String sql = "SELECT a.id, a.nomefile, a.dimensione FROM allegato a JOIN pubblicazione p ON a.id_pubblicazione = p.id WHERE (p.tipo = ?) AND "+
 						 "(p.data_pubblicazione BETWEEN ? AND ?) AND (p.id = ?)";
 			
 			try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -166,12 +190,18 @@ public class BachecaService implements Bacheca {
 				ps.setInt(4, id);
 				
 				try (ResultSet rs = ps.executeQuery()) {
-					List<Integer> lIdDoc = new ArrayList<>();
+					List<Allegato> lDocs = new ArrayList<>();
 					while(rs.next()) {
-						lIdDoc.add(rs.getInt("id"));
+						Allegato a = new Allegato();
+						a.setId(rs.getInt("id"));
+						a.setNomefile(rs.getString("nomefile"));
+						a.setDimensione(rs.getInt("dimensione"));
+						
+						lDocs.add(a);
 					}
 					
-					return Response.ok(Utils.resourcesToURI(info, lIdDoc)).build();
+					//return Response.ok(Utils.resourcesToURI(info, lIdDoc)).build();
+					return Response.ok(lDocs).build();
 				}
 			}
 		}
