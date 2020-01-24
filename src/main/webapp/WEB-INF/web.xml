@@ -16,7 +16,7 @@
 		<init-param>
 			<param-name>jaxrs.serviceClasses</param-name>
 			<param-value>
-				it.dipvvf.abr.app.bacheca.rest.BachecaService, it.dipvvf.abr.app.bacheca.rest.IndexService, it.dipvvf.abr.app.bacheca.rest.AuthService
+				it.dipvvf.abr.app.bacheca.rest.BoardService, it.dipvvf.abr.app.bacheca.rest.IndexService, it.dipvvf.abr.app.bacheca.rest.AuthService
 			</param-value>
 		</init-param>
 		<init-param>
