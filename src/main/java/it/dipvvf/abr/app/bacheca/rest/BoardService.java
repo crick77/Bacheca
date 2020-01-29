@@ -24,6 +24,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import it.dipvvf.abr.app.bacheca.model.Allegato;
 import it.dipvvf.abr.app.bacheca.model.Pubblicazione;
+import it.dipvvf.abr.app.bacheca.rest.security.SecurityCheck;
 import it.dipvvf.abr.app.bacheca.support.Utils;
 import it.dipvvf.abr.app.bacheca.support.soap.IndexInvocationCallback;
 import it.dipvvf.abr.app.bacheca.support.soap.MailAsyncHandler;
@@ -256,6 +257,7 @@ public class BoardService implements Board {
 	}
 
 	@Override
+	@SecurityCheck(issuer = AuthService.ISSUER)
 	public Response publishNew(HttpServletRequest req, UriInfo info) {
 		try (Connection con = Database.getInstance().getConnection();
 		     SetAutoCommit ac = new SetAutoCommit(con, false);
@@ -431,11 +433,13 @@ public class BoardService implements Board {
 	}
 
 	@Override
+	@SecurityCheck(issuer = AuthService.ISSUER)
 	public Response deleteCurrenYearItem(String tipo, int id) {
 		return deleteYearItem(tipo, LocalDate.now().getYear(), id);
 	}
 	
 	@Override
+	@SecurityCheck(issuer = AuthService.ISSUER)
 	public Response deleteYearItem(String tipo, int anno, int id) {
 		try (Connection con = Database.getInstance().getConnection()) {
 			LocalDate firstDay = LocalDate.of(anno, 1, 1);

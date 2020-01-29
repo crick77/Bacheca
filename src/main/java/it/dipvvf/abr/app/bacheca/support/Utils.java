@@ -12,7 +12,9 @@ import javax.ws.rs.core.UriInfo;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
+import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 
 /**
  * Classe di utilità generatica (membri statici).
@@ -109,5 +111,26 @@ public final class Utils {
 		}
 		
 		return token.sign(Algorithm.HMAC512(SECRET.getBytes()));
+	}
+	
+	/**
+	 * Verifica un token JWT con l'issuer indicato e restituisce
+	 * la sua versione decodificata se tutto è ok. Verrà restituito
+	 * null altrimenti.
+	 * 
+	 * @param token
+	 * @param issuer
+	 * @return
+	 */
+	public static DecodedJWT verify(String token, String issuer) {
+		try {
+			JWTVerifier verifier = JWT.require(Algorithm.HMAC512(SECRET.getBytes()))
+									.withIssuer(issuer)
+									.build();
+			return verifier.verify(token);
+		}
+		catch(Exception e) {
+			return null;
+		}
 	}
 }

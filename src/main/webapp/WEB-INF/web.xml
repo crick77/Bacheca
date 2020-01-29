@@ -20,6 +20,10 @@
 			</param-value>
 		</init-param>
 		<init-param>
+			<param-name>jaxrs.inInterceptors</param-name>
+			<param-value>it.dipvvf.abr.app.bacheca.rest.security.SecurityInterceptor</param-value>
+		</init-param>
+		<init-param>
 			<param-name>jaxrs.address</param-name>
 			<param-value>/api</param-value>
 		</init-param> 
