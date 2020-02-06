@@ -76,6 +76,31 @@
 			<version>3.8.3</version>
 		</dependency>
 
+<!-- Open Api and Swagger -->
+		<!-- note: a OpenApiFeature must be configured in the CXFNonSpringJaxrsServlet -->
+		<dependency>
+			<groupId>org.apache.cxf</groupId>
+			<artifactId>cxf-rt-rs-service-description-openapi-v3</artifactId>
+			<version>3.2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>swagger-ui</artifactId>
+			<version>3.13.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-annotations</artifactId>
+			<version>2.0.10</version>
+		</dependency>
+		<!-- used for automatic conversion JSON2Object and Object2JSON -->
+		<!-- note: a JacksonJsonProvider must be configured in the CXFNonSpringJaxrsServlet -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.jaxrs</groupId>
+			<artifactId>jackson-jaxrs-json-provider</artifactId>
+			<version>2.10.0</version>
+		</dependency>
+
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -128,6 +153,21 @@
 							<wsdlOptions>
 								<wsdlOption>
 									<wsdl>${basedir}/src/main/resources/auth.wsdl</wsdl>
+								</wsdlOption>
+							</wsdlOptions>
+						</configuration>
+						<goals>
+							<goal>wsdl2java</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>generate-index-sources</id>
+						<phase>generate-sources</phase>
+						<configuration>
+							<sourceRoot>${project.build.directory}/generated-sources/cxf</sourceRoot>
+							<wsdlOptions>
+								<wsdlOption>
+									<wsdl>${basedir}/src/main/resources/index.wsdl</wsdl>
 								</wsdlOption>
 							</wsdlOptions>
 						</configuration>

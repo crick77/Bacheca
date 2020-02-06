@@ -56,7 +56,7 @@
   </wsdl:binding>
   <wsdl:service name="MailSOAPServiceService">
     <wsdl:port binding="tns:MailSOAPServiceServiceSoapBinding" name="MailSOAPServicePort">
-      <soap:address location="http://localhost:8080/VVFMailSOAP/mail"/>
+      <soap:address location="http://localhost:8080/MailSOAP-VVF/mail"/>
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>

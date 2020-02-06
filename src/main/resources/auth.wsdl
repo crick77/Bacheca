@@ -91,7 +91,7 @@
   </wsdl:binding>
   <wsdl:service name="AuthSOAPServiceService">
     <wsdl:port binding="tns:AuthSOAPServiceServiceSoapBinding" name="AuthSOAPServicePort">
-      <soap:address location="http://localhost:8080/VVFAuthServiceSOAP/auth"/>
+      <soap:address location="http://localhost:8080/AuthServiceSOAP-VVF/auth"/>
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>

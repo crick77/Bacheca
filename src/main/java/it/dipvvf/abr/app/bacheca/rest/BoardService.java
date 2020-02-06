@@ -31,12 +31,15 @@ import it.dipvvf.abr.app.bacheca.support.soap.MailAsyncHandler;
 import it.dipvvf.abr.app.bacheca.support.sql.Database;
 import it.dipvvf.abr.app.bacheca.support.sql.Rollback;
 import it.dipvvf.abr.app.bacheca.support.sql.SetAutoCommit;
+import it.dipvvf.abr.app.index.soap.Index;
+import it.dipvvf.abr.app.index.soap.IndexSOAPImpService;
 import it.dipvvf.abr.app.mail.soap.Attachment;
 import it.dipvvf.abr.app.mail.soap.MailSOAP;
 import it.dipvvf.abr.app.mail.soap.MailSOAPServiceService;
 import it.dipvvf.abr.app.mail.soap.SendMail;
 
 public class BoardService implements Board {
+	public final static String INDEX_API = "http://localhost:8080/Bacheca/api/index";
 
 	@Override
 	public Response getElenco(String tipo, String query, UriInfo info) {
@@ -369,7 +372,7 @@ public class BoardService implements Board {
 			rb.commit();
 			
 			// Chiama servizio di indicizzazione in async (REST)
-			WebClient client = WebClient.create("http://localhost:8080/Bacheca/api/index/"+id);
+			WebClient client = WebClient.create(INDEX_API+"/"+id);
 			client.getHeaders().add("Accept", "text/plain,text/html,application/json,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
 			client.getHeaders().add("Content-Type", "text/plain");
 			client.async()
@@ -454,6 +457,11 @@ public class BoardService implements Board {
 				ps.setInt(4, id);
 				
 				if(ps.executeUpdate()==1) {
+					WebClient client = WebClient.create(INDEX_API+"/"+id);
+					client.getHeaders().add("Accept", "text/plain,text/html,application/json,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+					client.getHeaders().add("Content-Type", "text/plain");
+					client.delete();
+					
 					return Response.noContent().build();
 				}
 				else {
@@ -471,7 +479,7 @@ public class BoardService implements Board {
 	public Response getAnnualita(String tipo, UriInfo info) {
 		try (Connection con = Database.getInstance().getConnection()) {
 			// Estrae l'intero anno attuale
-			String sql = "SELECT DISTINCT(EXSTRACT(year FROM p.data_pubblicazione) AS anno FROM pubblicazione p WHERE (p.tipo = ?) ORDER BY anno DESC";
+			String sql = "SELECT DISTINCT(EXTRACT(year FROM p.data_pubblicazione)) AS anno FROM pubblicazione p WHERE (p.tipo = ?) ORDER BY anno DESC";
 			try (PreparedStatement ps = con.prepareStatement(sql)) {
 				ps.setString(1, tipo);
 				
@@ -481,7 +489,7 @@ public class BoardService implements Board {
 						lAnni.add(rs.getInt("anno"));
 					}
 					
-					return Response.ok(Utils.resourcesToURI(info, lAnni)).build();
+					return Response.ok(lAnni).build();
 				}
 			}
 		}
@@ -496,7 +504,7 @@ public class BoardService implements Board {
 		// non effettuare ricerche per testi < 3 caratteri
 		if(query.length()>3) {
 			// interroga l'indice
-			WebClient client = WebClient.create("http://localhost:8080/Bacheca/api/index/search");
+			WebClient client = WebClient.create(INDEX_API+"/search");
 			client.query("q", query);
 			client.getHeaders().add("Accept", "text/plain,text/html,application/json,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
 			client.getHeaders().add("Content-Type", "text/plain");
@@ -561,5 +569,16 @@ public class BoardService implements Board {
 			sqle.printStackTrace();
 			return Response.serverError().entity(sqle.toString()).build();
 		}
+	}
+
+	@Override
+	@SecurityCheck(issuer = AuthService.ISSUER)
+	public Response performBoardReindex() {
+		// Invoca via SOAP il servizio di reindicizzazione...
+		IndexSOAPImpService service = new IndexSOAPImpService();
+		Index indexSOAP = service.getIndexSOAPImpPort();
+		indexSOAP.reindex();
+		
+		return Response.ok().build();
 	}
 }
