@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<wsdl:definitions name="IndexSOAPImpService" targetNamespace="http://soap.index.app.abr.dipvvf.it/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://soap.index.app.abr.dipvvf.it/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1="http://schemas.xmlsoap.org/soap/http">
+   <wsdl:types>
+      <xs:schema elementFormDefault="unqualified" targetNamespace="http://soap.index.app.abr.dipvvf.it/" version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+         <xs:element name="reindex" type="tns:reindex"/>
+         <xs:complexType name="reindex">
+            <xs:sequence/>
+         </xs:complexType>
+      </xs:schema>
+   </wsdl:types>
+   <wsdl:message name="reindex">
+      <wsdl:part element="tns:reindex" name="parameters"/>
+   </wsdl:message>
+   <wsdl:portType name="index">
+      <wsdl:operation name="reindex">
+         <wsdl:input message="tns:reindex" name="reindex"/>
+      </wsdl:operation>
+   </wsdl:portType>
+   <wsdl:binding name="IndexSOAPImpServiceSoapBinding" type="tns:index">
+      <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+      <wsdl:operation name="reindex">
+         <soap:operation soapAction="" style="document"/>
+         <wsdl:input name="reindex">
+            <soap:body use="literal"/>
+         </wsdl:input>
+      </wsdl:operation>
+   </wsdl:binding>
+   <wsdl:service name="IndexSOAPImpService">
+      <wsdl:port binding="tns:IndexSOAPImpServiceSoapBinding" name="IndexSOAPImpPort">
+         <soap:address location="http://localhost:8080/Index/soap/index"/>
+      </wsdl:port>
+   </wsdl:service>
+</wsdl:definitions>
