@@ -11,7 +11,9 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
@@ -19,12 +21,19 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.endpoint.Endpoint;
+import org.apache.cxf.frontend.ClientProxy;
 import org.apache.cxf.jaxrs.client.WebClient;
+import org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor;
+import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.dom.handler.WSHandlerConstants;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import it.dipvvf.abr.app.bacheca.model.Allegato;
 import it.dipvvf.abr.app.bacheca.model.Pubblicazione;
 import it.dipvvf.abr.app.bacheca.rest.security.SecurityCheck;
+import it.dipvvf.abr.app.bacheca.soap.security.ClientPasswordHandler;
 import it.dipvvf.abr.app.bacheca.support.Utils;
 import it.dipvvf.abr.app.bacheca.support.soap.IndexInvocationCallback;
 import it.dipvvf.abr.app.bacheca.support.soap.MailAsyncHandler;
@@ -40,6 +49,8 @@ import it.dipvvf.abr.app.mail.soap.SendMail;
 
 public class BoardService implements Board {
 	public final static String INDEX_API = "http://localhost:8080/Bacheca/api/index";
+	public final static String MAILSERVICE_USERNAME = "mailuser1";
+	public final static String MAILSERVICE_PASSWORD = "passmail1";
 
 	@Override
 	public Response getElenco(String tipo, String query, UriInfo info) {
@@ -380,6 +391,16 @@ public class BoardService implements Board {
 					
 			// Chiama servizio di spedizione mail in async (SOAP)
 			MailSOAP mailService = new MailSOAPServiceService().getMailSOAPServicePort();
+			
+			Client wsClient = ClientProxy.getClient(mailService);
+			Endpoint mailEndpoint = wsClient.getEndpoint();
+			
+			Map<String, Object> outProps = new HashMap<>();
+			outProps.put(WSHandlerConstants.ACTION, WSHandlerConstants.USERNAME_TOKEN);
+			outProps.put(WSHandlerConstants.USER, MAILSERVICE_USERNAME);
+			outProps.put(WSHandlerConstants.PASSWORD_TYPE, WSConstants.PW_TEXT);
+			outProps.put(WSHandlerConstants.PW_CALLBACK_CLASS, ClientPasswordHandler.class.getName());
+			mailEndpoint.getOutInterceptors().add(new WSS4JOutInterceptor(outProps));
 			
 			SendMail sm = new SendMail();
 			sm.setSender("ciccio@send.com");
