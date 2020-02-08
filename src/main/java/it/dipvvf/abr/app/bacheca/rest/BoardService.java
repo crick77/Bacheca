@@ -465,10 +465,19 @@ public class BoardService implements Board {
 	@Override
 	@SecurityCheck(issuer = AuthService.ISSUER)
 	public Response deleteYearItem(String tipo, int anno, int id) {
-		try (Connection con = Database.getInstance().getConnection()) {
+		try (Connection con = Database.getInstance().getConnection();
+				SetAutoCommit ac = new SetAutoCommit(con, false);
+			    Rollback rb = new Rollback(con)) {
+	
 			LocalDate firstDay = LocalDate.of(anno, 1, 1);
 			LocalDate lastDay = LocalDate.of(anno, 12, 31);
 
+			String sql = "DELETE FROM allegato a WHERE p.id_pubblicazione = ?";
+			try(PreparedStatement ps = con.prepareStatement(sql)) {
+				ps.setInt(1, id);
+				ps.executeUpdate();
+			}
+			
 			// Estrae l'intero anno attuale
 			try (PreparedStatement ps = con.prepareStatement(
 					"DELETE FROM pubblicazione p WHERE (p.tipo = ?) AND (p.data_pubblicazione BETWEEN ? AND ?) AND (p.id = ?)")) {
@@ -482,6 +491,8 @@ public class BoardService implements Board {
 					client.getHeaders().add("Accept", "text/plain,text/html,application/json,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
 					client.getHeaders().add("Content-Type", "text/plain");
 					client.delete();
+					
+					rb.commit();
 					
 					return Response.noContent().build();
 				}
