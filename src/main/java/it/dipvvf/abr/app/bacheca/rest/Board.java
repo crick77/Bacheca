@@ -286,6 +286,7 @@ public interface Board {
 				)
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "201",description = "Created"),
+			@ApiResponse(responseCode = "401",description = "Unauthorized"),
 			@ApiResponse(responseCode = "409",description = "Conflict"),
 			@ApiResponse(responseCode = "500",description = "Server error")
 	})
@@ -297,7 +298,7 @@ public interface Board {
 	@Operation(summary = "deleteYearItem",description = "Allowed for all users",tags = {"Pubblications"})
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "204",description = "No content"),
-			@ApiResponse(responseCode = "404",description = "Not found"),
+			@ApiResponse(responseCode = "401",description = "Unauthorized"),
 			@ApiResponse(responseCode = "500",description = "Server error")
 	})
 	@SecurityRequirement(name = "bearerAuth")
@@ -314,7 +315,7 @@ public interface Board {
 	@Operation(summary = "deleteCurrentYearItem",description = "Allowed for all users",tags = {"Pubblications"})
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "204",description = "No content"),
-			@ApiResponse(responseCode = "404",description = "Not found"),
+			@ApiResponse(responseCode = "401",description = "Unauthorized"),
 			@ApiResponse(responseCode = "500",description = "Server error")
 	})
 	@SecurityRequirement(name = "bearerAuth")

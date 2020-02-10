@@ -15,7 +15,7 @@
 		</init-param>
 		<init-param>
 			<param-name>jaxrs.address</param-name>
-			<param-value>/api</param-value>
+			<param-value>/</param-value>
 		</init-param> 
 		<init-param>
 			<param-name>jaxrs.providers</param-name>
@@ -37,7 +37,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>CXFNonSpringJaxrsServlet</servlet-name>
-		<url-pattern>/*</url-pattern>
+		<url-pattern>/api/*</url-pattern>
 	</servlet-mapping>
 	<resource-ref>
 		<description>postgreSQL Bacheca</description>

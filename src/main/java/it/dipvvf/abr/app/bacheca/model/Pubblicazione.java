@@ -24,6 +24,8 @@ public class Pubblicazione {
 	private String proprietario;
 	private String nomeDocumento;
 	private int dimensione;
+	private String mailStatus;
+	private String indexingStatus;
 	@XmlTransient
 	@JsonIgnore
 	private byte[] contenutoDocumento;
@@ -33,7 +35,7 @@ public class Pubblicazione {
 	}
 	
 	public Pubblicazione(int id, String tipo, int numero, Date dataPubblicazione, String titolo, String ufficio,
-			String proprietario, String nomeDocumento, int dimensione, byte[] contenutoDocumento) {
+			String proprietario, String nomeDocumento, int dimensione, String mailStatus, String indexingStatus, byte[] contenutoDocumento) {
 		super();
 		this.id = id;
 		this.tipo = tipo;
@@ -44,6 +46,8 @@ public class Pubblicazione {
 		this.proprietario = proprietario;
 		this.nomeDocumento = nomeDocumento;
 		this.dimensione = dimensione;
+		this.mailStatus = mailStatus;
+		this.indexingStatus = indexingStatus;
 		this.contenutoDocumento = contenutoDocumento;
 	}
 
@@ -117,6 +121,22 @@ public class Pubblicazione {
 
 	public void setDimensione(int dimensione) {
 		this.dimensione = dimensione;
+	}
+	
+	public String getMailStatus() {
+		return mailStatus;
+	}
+
+	public void setMailStatus(String mailStatus) {
+		this.mailStatus = mailStatus;
+	}
+
+	public String getIndexingStatus() {
+		return indexingStatus;
+	}
+
+	public void setIndexingStatus(String indexingStatus) {
+		this.indexingStatus = indexingStatus;
 	}
 
 	public byte[] getContenutoDocumento() {

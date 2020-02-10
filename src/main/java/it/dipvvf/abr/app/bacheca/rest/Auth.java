@@ -2,6 +2,7 @@ package it.dipvvf.abr.app.bacheca.rest;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -31,14 +32,14 @@ public interface Auth {
 	@Path("login")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Operation(
-				summary = "login",
-				tags = {"User"},
-				description = "Login authentication", 
-				responses = {
-					   @ApiResponse(responseCode = "200",description = "OK"),
-					   @ApiResponse(responseCode = "304",description = "Not modified"),
-					   @ApiResponse(responseCode = "401",description = "Unauthorized")
-				}
+			summary = "login",
+			tags = {"User"},
+			description = "Login authentication", 
+			responses = {
+				   @ApiResponse(responseCode = "200",description = "OK"),
+				   @ApiResponse(responseCode = "304",description = "Not modified"),
+				   @ApiResponse(responseCode = "401",description = "Unauthorized")
+			}
 	)
 	public Response login(
 			@Parameter(description="Object 'User' with credentials",required=true) final User accessInfo);
@@ -47,25 +48,25 @@ public interface Auth {
 	@POST
 	@Path("logout")
 	@SecurityRequirement(name = "bearerAuth")
-//	public Response logout(@HeaderParam("Authorization") 
-//	 	@Parameter (description = "Token used for the login to verify that the session is correct",required=true) String token);
 	@Operation(
 			summary = "logout",
 			tags = {"User"},
 			description = "Logout authentication", 
-					responses = {
-							   @ApiResponse(responseCode = "200",description = "OK"),
-							   @ApiResponse(responseCode = "304",description = "Not modified")
-						})
-	public Response logout(@Parameter(description = "JWT Token",required = true)String token);
+			responses = {
+					   @ApiResponse(responseCode = "200",description = "OK"),
+					   @ApiResponse(responseCode = "304",description = "Not modified")
+			}
+	)
+    public Response logout(@HeaderParam("Authorization") @Parameter (description = "Token used for the login to verify that the session is correct", required=true) String token);
+	
 	@GET
 	@Path("count")
 	@Operation(
 			summary = "count",
 			tags = {"User"},
 			description = "return the number of logged users", 
-					responses = {
-							   @ApiResponse(responseCode = "200",description = "OK")
+			responses = {
+					   @ApiResponse(responseCode = "200",description = "OK")
 			}
 	)
 	public String count();

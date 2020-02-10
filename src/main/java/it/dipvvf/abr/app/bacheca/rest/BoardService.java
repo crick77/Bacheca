@@ -48,7 +48,7 @@ import it.dipvvf.abr.app.mail.soap.MailSOAPServiceService;
 import it.dipvvf.abr.app.mail.soap.SendMail;
 
 public class BoardService implements Board {
-	public final static String INDEX_API = "http://localhost:8080/Bacheca/api/index";
+	public final static String INDEX_API = "http://localhost:8080/Index/api/index/";
 	public final static String MAILSERVICE_USERNAME = "mailuser1";
 	public final static String MAILSERVICE_PASSWORD = "passmail1";
 
@@ -94,7 +94,7 @@ public class BoardService implements Board {
 
 			// Estrae l'intero anno attuale
 			String sql = "SELECT p.id, p.tipo, p.numero, p.data_pubblicazione, p.titolo, p.ufficio, p.proprietario, ";
-			sql+="p.nome_documento, p.dimensione FROM pubblicazione AS p WHERE (p.tipo = ?) AND (p.data_pubblicazione BETWEEN ? AND ?) ";
+			sql+="p.nome_documento, p.dimensione, p.mail_status, p.indexing_status FROM pubblicazione AS p WHERE (p.tipo = ?) AND (p.data_pubblicazione BETWEEN ? AND ?) ";
 			if(doIndexSearch && matchId.length>0) {
 				sql+="AND p.id IN ("+String.join(",", Collections.nCopies(matchId.length, "?"))+") ";
 			}
@@ -123,6 +123,8 @@ public class BoardService implements Board {
 						p.setProprietario(rs.getString("proprietario"));
 						p.setNomeDocumento(rs.getString("nome_documento"));
 						p.setDimensione(rs.getInt("dimensione"));
+						p.setMailStatus(rs.getString("mail_status"));
+						p.setIndexingStatus(rs.getString("indexing_status"));
 						
 						lElenco.add(p);
 					}
@@ -169,6 +171,8 @@ public class BoardService implements Board {
 						p.setDataPubblicazione(rs.getDate("data_pubblicazione"));
 						p.setNomeDocumento(rs.getString("nome_documento"));
 						p.setDimensione(rs.getInt("dimensione"));
+						p.setMailStatus(rs.getString("mail_status"));
+						p.setIndexingStatus(rs.getString("indexing_status"));
 						p.setContenutoDocumento(rs.getBytes("contenuto_documento"));
 						
 						return Response.ok(p).build();
@@ -472,7 +476,7 @@ public class BoardService implements Board {
 			LocalDate firstDay = LocalDate.of(anno, 1, 1);
 			LocalDate lastDay = LocalDate.of(anno, 12, 31);
 
-			String sql = "DELETE FROM allegato a WHERE p.id_pubblicazione = ?";
+			String sql = "DELETE FROM allegato a WHERE a.id_pubblicazione = ?";
 			try(PreparedStatement ps = con.prepareStatement(sql)) {
 				ps.setInt(1, id);
 				ps.executeUpdate();
