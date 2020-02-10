@@ -327,7 +327,7 @@ public interface Board {
 	
 	@GET
 	@Path("reindex")
-	@Operation(summary = "performBoardReindex",description = "Perform a complete board reindexing",tags = {"Pubblications"})
+	@Operation(summary = "performBoardReindex",description = "Perform a complete board reindexing",tags = {"Pubblications", "Index"})
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200",description = "OK"),
 	})
